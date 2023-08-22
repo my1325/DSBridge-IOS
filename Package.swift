@@ -10,6 +10,6 @@ let package = Package(
         .library(name: "DSBridge", targets: ["DSBridge"])
     ],
     targets: [
-        .target(name: "DSBridge")
+        .target(name: "DSBridge", publicHeadersPath: ".")
     ]
 )
