@@ -311,9 +311,7 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
                     break;
                 }
             }else if([JavascriptInterfaceObject respondsToSelector:sel]){
-                id ret;
-                id(*action)(id,SEL,id) = (id(*)(id,SEL,id))objc_msgSend;
-                ret=action(JavascriptInterfaceObject,sel,arg);
+                id ret = [self run:JavascriptInterfaceObject sel:sel args: arg];
                 [result setValue:@0 forKey:@"code"];
                 if(ret!=nil){
                     [result setValue:ret forKey:@"data"];
@@ -329,6 +327,22 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
         }while (0);
     }
     return [JSBUtil objToJsonString:result];
+}
+
+- (id)run: (id)swiftObject sel: (SEL)sel args: (id)args {
+    if (![swiftObject respondsToSelector:sel]) return nil;
+    Method method1 = class_getInstanceMethod([swiftObject class], sel);
+    char retType[10];
+    method_getReturnType(method1, retType, 10);
+    if (strcmp("v", retType) == 0) {
+        void(*action)(id,SEL,id) = (void(*)(id,SEL,id))objc_msgSend;
+        action(swiftObject, sel, args);
+        return nil;
+    } else {
+        id(*action)(id,SEL,id) = (id(*)(id,SEL,id))objc_msgSend;
+        id ret = action(swiftObject, sel, args);
+        return ret;
+    }
 }
 
 - (void)setJavascriptCloseWindowListener:(void (^)(void))callback
