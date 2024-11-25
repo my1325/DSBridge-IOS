@@ -10,9 +10,9 @@
     void (^confirmHandler)(BOOL);
     void (^promptHandler)(NSString *);
     void(^javascriptCloseWindowListener)(void);
-    int dialogType;
+//    int dialogType;
     int callId;
-    bool jsDialogBlock;
+//    bool jsDialogBlock;
     NSMutableDictionary<NSString *,id> *javaScriptNamespaceInterfaces;
     NSMutableDictionary *handerMap;
     NSMutableArray<DSCallInfo *> * callInfoList;
@@ -25,15 +25,16 @@
 }
 
 
--(instancetype)initWithFrame:(CGRect)frame configuration:(WKWebViewConfiguration *)configuration
+- (instancetype)initWithFrame:(CGRect)frame
+               configuration:(WKWebViewConfiguration *)configuration
 {
     txtName=nil;
-    dialogType=0;
+//    dialogType=0;
     callId=0;
     alertHandler=nil;
     confirmHandler=nil;
     promptHandler=nil;
-    jsDialogBlock=true;
+//    jsDialogBlock=true;
     callInfoList=[NSMutableArray array];
     javaScriptNamespaceInterfaces=[NSMutableDictionary dictionary];
     handerMap=[NSMutableDictionary dictionary];
@@ -58,8 +59,10 @@
     return self;
 }
 
-- (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt
-    defaultText:(nullable NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame
+- (void)webView:(WKWebView *)webView
+runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt
+    defaultText:(nullable NSString *)defaultText
+initiatedByFrame:(WKFrameInfo *)frame
 completionHandler:(void (^)(NSString * _Nullable result))completionHandler
 {
     NSString * prefix=@"_dsbridge=";
@@ -79,9 +82,6 @@ completionHandler:(void (^)(NSString * _Nullable result))completionHandler
         completionHandler(result);
         
     }else {
-        if(!jsDialogBlock){
-            completionHandler(nil);
-        }
         if(self.DSUIDelegate && [self.DSUIDelegate respondsToSelector:
                                  @selector(webView:runJavaScriptTextInputPanelWithPrompt
                                            :defaultText:initiatedByFrame
@@ -92,32 +92,16 @@ completionHandler:(void (^)(NSString * _Nullable result))completionHandler
                              initiatedByFrame:frame
                             completionHandler:completionHandler];
         }else{
-            dialogType=3;
-            if(jsDialogBlock){
-                promptHandler=completionHandler;
-            }
-            UIAlertView *alert = [[UIAlertView alloc]
-                                  initWithTitle:prompt
-                                  message:@""
-                                  delegate:self
-                                  cancelButtonTitle:dialogTextDic[@"promptCancelBtn"]?dialogTextDic[@"promptCancelBtn"]:@"取消"
-                                  otherButtonTitles:dialogTextDic[@"promptOkBtn"]?dialogTextDic[@"promptOkBtn"]:@"确定",
-                                  nil];
-            [alert setAlertViewStyle:UIAlertViewStylePlainTextInput];
-            txtName = [alert textFieldAtIndex:0];
-            txtName.text=defaultText;
-            [alert show];
+            completionHandler(nil);
         }
     }
 }
 
-- (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message
+- (void)webView:(WKWebView *)webView
+runJavaScriptAlertPanelWithMessage:(NSString *)message
 initiatedByFrame:(WKFrameInfo *)frame
 completionHandler:(void (^)(void))completionHandler
 {
-    if(!jsDialogBlock){
-        completionHandler();
-    }
     if( self.DSUIDelegate &&  [self.DSUIDelegate respondsToSelector:
                                @selector(webView:runJavaScriptAlertPanelWithMessage
                                          :initiatedByFrame:completionHandler:)])
@@ -126,26 +110,15 @@ completionHandler:(void (^)(void))completionHandler
                          initiatedByFrame:frame
                         completionHandler:completionHandler];
     }else{
-        dialogType=1;
-        if(jsDialogBlock){
-            alertHandler=completionHandler;
-        }
-        UIAlertView *alertView =
-        [[UIAlertView alloc] initWithTitle:dialogTextDic[@"alertTitle"]?dialogTextDic[@"alertTitle"]:@"提示"
-                                   message:message
-                                  delegate:self
-                         cancelButtonTitle:dialogTextDic[@"alertBtn"]?dialogTextDic[@"alertBtn"]:@"确定"
-                         otherButtonTitles:nil,nil];
-        [alertView show];
+        completionHandler();
     }
 }
 
--(void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message
-initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler
+-(void)webView:(WKWebView *)webView
+runJavaScriptConfirmPanelWithMessage:(NSString *)message
+initiatedByFrame:(WKFrameInfo *)frame
+completionHandler:(void (^)(BOOL))completionHandler
 {
-    if(!jsDialogBlock){
-        completionHandler(YES);
-    }
     if( self.DSUIDelegate&& [self.DSUIDelegate respondsToSelector:
                             @selector(webView:runJavaScriptConfirmPanelWithMessage:initiatedByFrame:completionHandler:)])
     {
@@ -153,21 +126,15 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
                         initiatedByFrame:frame
                        completionHandler:completionHandler];
     }else{
-        dialogType=2;
-        if(jsDialogBlock){
-            confirmHandler=completionHandler;
-        }
-        UIAlertView *alertView =
-        [[UIAlertView alloc] initWithTitle:dialogTextDic[@"confirmTitle"]?dialogTextDic[@"confirmTitle"]:@"提示"
-                                   message:message
-                                  delegate:self
-                         cancelButtonTitle:dialogTextDic[@"confirmCancelBtn"]?dialogTextDic[@"confirmCancelBtn"]:@"取消"
-                         otherButtonTitles:dialogTextDic[@"confirmOkBtn"]?dialogTextDic[@"confirmOkBtn"]:@"确定", nil];
-        [alertView show];
+        completionHandler(YES);
     }
 }
 
-- (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures{
+- (WKWebView *)webView:(WKWebView *)webView
+createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration
+   forNavigationAction:(WKNavigationAction *)navigationAction
+        windowFeatures:(WKWindowFeatures *)windowFeatures
+{
     if( self.DSUIDelegate && [self.DSUIDelegate respondsToSelector:
                               @selector(webView:createWebViewWithConfiguration:forNavigationAction:windowFeatures:)]){
         return [self.DSUIDelegate webView:webView createWebViewWithConfiguration:configuration forNavigationAction:navigationAction windowFeatures:windowFeatures];
@@ -182,7 +149,9 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     }
 }
 
-- (BOOL)webView:(WKWebView *)webView shouldPreviewElement:(WKPreviewElementInfo *)elementInfo{
+- (BOOL)webView:(WKWebView *)webView
+shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
+{
     if( self.DSUIDelegate
        && [self.DSUIDelegate respondsToSelector:
            @selector(webView:shouldPreviewElement:)]){
@@ -191,9 +160,13 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     return NO;
 }
 
-- (UIViewController *)webView:(WKWebView *)webView previewingViewControllerForElement:(WKPreviewElementInfo *)elementInfo defaultActions:(NSArray<id<WKPreviewActionItem>> *)previewActions{
+- (UIViewController *)webView:(WKWebView *)webView
+previewingViewControllerForElement:(WKPreviewElementInfo *)elementInfo
+               defaultActions:(NSArray<id<WKPreviewActionItem>> *)previewActions
+{
     if( self.DSUIDelegate &&
-       [self.DSUIDelegate respondsToSelector:@selector(webView:previewingViewControllerForElement:defaultActions:)]){
+       [self.DSUIDelegate respondsToSelector:@selector(webView:previewingViewControllerForElement:defaultActions:)])
+    {
         return [self.DSUIDelegate
                 webView:webView
                 previewingViewControllerForElement:elementInfo
@@ -204,14 +177,22 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
 }
 
 
-- (void)webView:(WKWebView *)webView commitPreviewingViewController:(UIViewController *)previewingViewController{
+- (void)webView:(WKWebView *)webView
+commitPreviewingViewController:(UIViewController *)previewingViewController
+{
     if( self.DSUIDelegate
-       && [self.DSUIDelegate respondsToSelector:@selector(webView:commitPreviewingViewController:)]){
+       && [self.DSUIDelegate respondsToSelector:@selector(webView:commitPreviewingViewController:)])
+    {
         return [self.DSUIDelegate webView:webView commitPreviewingViewController:previewingViewController];
     }
 }
 
-- (void)webView:(WKWebView *)webView requestMediaCapturePermissionForOrigin:(WKSecurityOrigin *)origin initiatedByFrame:(WKFrameInfo *)frame type:(WKMediaCaptureType)type decisionHandler:(void (^)(WKPermissionDecision))decisionHandler  API_AVAILABLE(ios(15.0)) {
+- (void)webView:(WKWebView *)webView
+requestMediaCapturePermissionForOrigin:(WKSecurityOrigin *)origin
+initiatedByFrame:(WKFrameInfo *)frame
+           type:(WKMediaCaptureType)type
+decisionHandler:(void (^)(WKPermissionDecision))decisionHandler  API_AVAILABLE(ios(15.0))
+{
     if(self.DSUIDelegate && [self.DSUIDelegate respondsToSelector:@selector(webView:requestMediaCapturePermissionForOrigin:initiatedByFrame:type:decisionHandler:)]) {
         [self.DSUIDelegate webView:webView requestMediaCapturePermissionForOrigin:origin initiatedByFrame:frame type:type decisionHandler:decisionHandler];
     } else {
@@ -219,26 +200,8 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     }
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+- (void) evalJavascript:(int) delay
 {
-    if(dialogType==1 && alertHandler){
-        alertHandler();
-        alertHandler=nil;
-    }else if(dialogType==2 && confirmHandler){
-        confirmHandler(buttonIndex==1?YES:NO);
-        confirmHandler=nil;
-    }else if(dialogType==3 && promptHandler && txtName) {
-        if(buttonIndex==1){
-            promptHandler([txtName text]);
-        }else{
-            promptHandler(@"");
-        }
-        promptHandler=nil;
-        txtName=nil;
-    }
-}
-
-- (void) evalJavascript:(int) delay{
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         @synchronized(self){
             if([jsCache length]!=0){
@@ -329,7 +292,10 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     return [JSBUtil objToJsonString:result];
 }
 
-- (id)run: (id)swiftObject sel: (SEL)sel args: (id)args {
+- (id)run: (id)swiftObject
+      sel: (SEL)sel
+     args: (id)args
+{
     if (![swiftObject respondsToSelector:sel]) return nil;
     Method method1 = class_getInstanceMethod([swiftObject class], sel);
     char retType[10];
@@ -361,15 +327,25 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
 }
 
 
-- (void)callHandler:(NSString *)methodName arguments:(NSArray *)args{
-    [self callHandler:methodName arguments:args completionHandler:nil];
+- (void)callHandler:(NSString *)methodName
+          arguments:(NSArray *)args
+{
+    [self callHandler:methodName
+            arguments:args
+    completionHandler:nil];
 }
 
-- (void)callHandler:(NSString *)methodName completionHandler:(void (^)(id _Nullable))completionHandler{
-    [self callHandler:methodName arguments:nil completionHandler:completionHandler];
+- (void)callHandler:(NSString *)methodName
+  completionHandler:(void (^)(id _Nullable))completionHandler
+{
+    [self callHandler:methodName
+            arguments:nil
+    completionHandler:completionHandler];
 }
 
--(void)callHandler:(NSString *)methodName arguments:(NSArray *)args completionHandler:(void (^)(id  _Nullable value))completionHandler
+-(void)callHandler:(NSString *)methodName
+         arguments:(NSArray *)args
+ completionHandler:(void (^)(id  _Nullable value))completionHandler
 {
     DSCallInfo *callInfo=[[DSCallInfo alloc] init];
     callInfo.id=[NSNumber numberWithInt: callId++];
@@ -394,13 +370,19 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
 }
 
 - (void) dispatchJavascriptCall:(DSCallInfo*) info{
-    NSString * json=[JSBUtil objToJsonString:@{@"method":info.method,@"callbackId":info.id,
-                                               @"data":[JSBUtil objToJsonString: info.args]}];
+    NSString * json=[JSBUtil objToJsonString:@{
+        @"method": info.method,
+        @"callbackId": info.id,
+        @"data":[JSBUtil objToJsonString: info.args]
+    }];
+    
     [self evaluateJavaScript:[NSString stringWithFormat:@"window._handleMessageFromNative(%@)",json]
            completionHandler:nil];
 }
 
-- (void) addJavascriptObject:(id)object namespace:(NSString *)namespace{
+- (void) addJavascriptObject:(id)object
+                   namespace:(NSString *)namespace
+{
     if(namespace==nil){
         namespace=@"";
     }
@@ -446,9 +428,9 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     return ret;
 }
 
-- (bool) hasNativeMethod:(NSDictionary *) args
+- (bool)hasNativeMethod:(NSDictionary *) args
 {
-    NSArray *nameStr=[JSBUtil parseNamespace:[args[@"name"]stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+    NSArray *nameStr=[JSBUtil parseNamespace:[args[@"name"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
     NSString * type= [args[@"type"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     id JavascriptInterfaceObject= [javaScriptNamespaceInterfaces objectForKey:nameStr[0]];
     if(JavascriptInterfaceObject){
@@ -464,14 +446,14 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     return false;
 }
 
-- (id) closePage:(NSDictionary *) args{
+- (id)closePage:(NSDictionary *) args{
     if(javascriptCloseWindowListener){
         javascriptCloseWindowListener();
     }
     return nil;
 }
 
-- (id) returnValue:(NSDictionary *) args{
+- (id)returnValue:(NSDictionary *) args{
     void (^ completionHandler)(NSString *  _Nullable)= handerMap[args[@"id"]];
     if(completionHandler){
         if(isDebug){
@@ -495,12 +477,12 @@ initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completi
     return nil;
 }
 
-- (void) disableJavascriptDialogBlock:(bool) disable{
-    jsDialogBlock=!disable;
-}
-
-- (void)hasJavascriptMethod:(NSString *)handlerName methodExistCallback:(void (^)(bool exist))callback{
-    [self callHandler:@"_hasJavascriptMethod" arguments:@[handlerName] completionHandler:^(NSNumber* _Nullable value) {
+- (void)hasJavascriptMethod:(NSString *)handlerName
+        methodExistCallback:(void (^)(bool exist))callback
+{
+    [self callHandler:@"_hasJavascriptMethod"
+            arguments:@[handlerName]
+    completionHandler:^(NSNumber* _Nullable value) {
         callback([value boolValue]);
     }];
 }
