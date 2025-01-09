@@ -200,18 +200,18 @@ commitPreviewingViewController:(UIViewController *)previewingViewController
     }
 }
 
-- (void)webView:(WKWebView *)webView
-requestMediaCapturePermissionForOrigin:(WKSecurityOrigin *)origin
-initiatedByFrame:(WKFrameInfo *)frame
-           type:(WKMediaCaptureType)type
-decisionHandler:(void (^)(WKPermissionDecision))decisionHandler  API_AVAILABLE(ios(15.0))
-{
-    if(self.DSUIDelegate && [self.DSUIDelegate respondsToSelector:@selector(webView:requestMediaCapturePermissionForOrigin:initiatedByFrame:type:decisionHandler:)]) {
-        [self.DSUIDelegate webView:webView requestMediaCapturePermissionForOrigin:origin initiatedByFrame:frame type:type decisionHandler:decisionHandler];
-    } else {
-        decisionHandler(WKPermissionDecisionGrant);
-    }
-}
+//- (void)webView:(WKWebView *)webView
+//requestMediaCapturePermissionForOrigin:(WKSecurityOrigin *)origin
+//initiatedByFrame:(WKFrameInfo *)frame
+//           type:(WKMediaCaptureType)type
+//decisionHandler:(void (^)(WKPermissionDecision))decisionHandler  API_AVAILABLE(ios(15.0))
+//{
+//    if(self.DSUIDelegate && [self.DSUIDelegate respondsToSelector:@selector(webView:requestMediaCapturePermissionForOrigin:initiatedByFrame:type:decisionHandler:)]) {
+//        [self.DSUIDelegate webView:webView requestMediaCapturePermissionForOrigin:origin initiatedByFrame:frame type:type decisionHandler:decisionHandler];
+//    } else {
+//        decisionHandler(WKPermissionDecisionGrant);
+//    }
+//}
 
 - (void) evalJavascript:(int) delay
 {
