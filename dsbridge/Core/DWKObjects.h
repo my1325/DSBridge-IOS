@@ -10,17 +10,26 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef void(^DWKEventCallback)(id _Nullable result, BOOL complete);
+
 @interface DWKWebViewEvent : NSObject
 
 @property (nonatomic, copy) NSString *dwk_namespace;
 
 @property (nonatomic, copy) NSString *dwk_method;
 
+@property (nonatomic, copy) DWKEventCallback dwk_callback;
+
 @property (nonatomic, copy) id dwk_args;
 
 + (instancetype)dwk_eventWithNamespace:(NSString *)dwk_namespace
                                  method:(NSString *)dwk_method
                                     args:(id)dwk_args;
+
++ (instancetype)dwk_eventWithNamespace:(NSString *)dwk_namespace
+                                 method:(NSString *)dwk_method
+                                    args:(id)dwk_args
+                         callback:(DWKEventCallback _Nullable)dwk_callback;
 @end
 
 

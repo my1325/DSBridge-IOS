@@ -31,55 +31,70 @@
 //}
 //
 ////get this class all method
-//+ (NSArray *)allMethodFromClass:(Class)class {
+// + (NSArray *)allMethodFromClass:(Class)class {
 //    NSMutableArray *methods = [NSMutableArray array];
-//
+
 //    while (class) {
 //        unsigned int count = 0;
 //        Method *method = class_copyMethodList(class, &count);
-//
+
 //        for (unsigned int i = 0; i < count; i++) {
 //            SEL name1 = method_getName(method[i]);
 //            const char *selName = sel_getName(name1);
 //            NSString *strName = [NSString stringWithCString:selName encoding:NSUTF8StringEncoding];
 //            [methods addObject:strName];
 //        }
-//
+
 //        free(method);
-//
+
 //        Class cls = class_getSuperclass(class);
 //        class = [NSStringFromClass(cls) isEqualToString:NSStringFromClass([NSObject class])] ? nil : cls;
 //    }
-//
+
 //    return [NSArray arrayWithArray:methods];
-//}
-//
-////return method name for xxx: or xxx:handle:
-//+ (NSString *)methodByNameArg:(NSInteger)argNum selName:(NSString *)selName class:(Class)class
-//{
-//    NSString *result = nil;
-//
-//    if (class) {
-//        NSArray *arr = [JSBUtil allMethodFromClass:class];
-//
-//        for (int i = 0; i < arr.count; i++) {
-//            NSString *method = arr[i];
-//            NSArray *tmpArr = [method componentsSeparatedByString:@":"];
-//            NSRange range = [method rangeOfString:@":"];
-//
-//            if (range.length > 0) {
-//                NSString *methodName = [method substringWithRange:NSMakeRange(0, range.location)];
-//
-//                if ([methodName isEqualToString:selName] && tmpArr.count == (argNum + 1)) {
-//                    result = method;
-//                    return result;
-//                }
-//            }
-//        }
-//    }
-//
-//    return result;
-//}
+// }
+
+// //return method name for xxx: or xxx:handle:
+// + (NSString *)methodByNameArg:(NSInteger)argNum selName:(NSString *)selName class:(Class)class
+// {
+//     if (!class || !selName) {
+//         return nil;
+//     }
+
+//     NSArray *methods = [JSBUtil allMethodFromClass:class];
+//     NSInteger expectedColonCount = argNum;
+
+//     for (NSString *method in methods) {
+//         // 快速检查：如果方法名不是以selName开头，直接跳过
+//         if (![method hasPrefix:selName]) {
+//             continue;
+//         }
+
+//         // 计算冒号个数来判断参数个数
+//         NSInteger colonCount = [method componentsSeparatedByString:@":"].count - 1;
+
+//         if (colonCount == expectedColonCount) {
+//             // 进一步验证方法名前缀是否完全匹配
+//             if (colonCount == 0) {
+//                 // 无参数方法，直接比较整个方法名
+//                 if ([method isEqualToString:selName]) {
+//                     return method;
+//                 }
+//             } else {
+//                 // 有参数方法，提取方法名前缀比较
+//                 NSRange firstColonRange = [method rangeOfString:@":"];
+//                 if (firstColonRange.location != NSNotFound) {
+//                     NSString *methodPrefix = [method substringToIndex:firstColonRange.location];
+//                     if ([methodPrefix isEqualToString:selName]) {
+//                         return method;
+//                     }
+//                 }
+//             }
+//         }
+//     }
+
+//     return nil;
+// }
 //
 //+ (NSArray *)parseNamespace:(NSString *)method {
 //    NSRange range = [method rangeOfString:@"." options:NSBackwardsSearch];
@@ -117,20 +132,42 @@
 
 #import "DWKObjects.h"
 
-inline DWKWebViewEvent * dwk_event_with_origin(NSString *dwk_originString, NSString *dwk_argsString) {
+inline DWKWebViewEvent * dwk_event_with_origin(NSString *dwk_originString, id dwk_args) {
+    return dwk_event_with_origin_handler(dwk_originString, dwk_args, nil);
+}
+
+inline DWKWebViewEvent * dwk_event_with_origin_handler(NSString *dwk_originString, id dwk_args, DWKEventCallback dwk_callback) {
+    // 参数验证
+    if (!dwk_originString.length) {
+        return [DWKWebViewEvent dwk_eventWithNamespace:@""
+                                                method:@""
+                                                  args:dwk_args];
+    }
+
+    // 去除首尾空白字符
     dwk_originString = [dwk_originString stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+    // 查找最后一个点的位置
     NSRange dwk_range = [dwk_originString rangeOfString:@"." options:NSBackwardsSearch];
-    NSString *dwk_method = @"";
     NSString *dwk_namespace = @"";
+    NSString *dwk_method = dwk_originString; // 默认整个字符串作为方法名
 
     if (dwk_range.location != NSNotFound) {
-        dwk_namespace = [dwk_originString substringToIndex:dwk_range.location];
-        dwk_method = [dwk_originString substringFromIndex:dwk_range.location + 1];
+        if (dwk_range.location > 0) {
+            // 正常情况：namespace.method
+            dwk_namespace = [dwk_originString substringToIndex:dwk_range.location];
+            dwk_method = [dwk_originString substringFromIndex:dwk_range.location + 1];
+        } else {
+            // 特殊情况：.method (点在开头)
+            dwk_namespace = @"";
+            dwk_method = [dwk_originString substringFromIndex:1]; // 跳过开头的点
+        }
     }
 
     return [DWKWebViewEvent dwk_eventWithNamespace:dwk_namespace
                                             method:dwk_method
-    args:dwk_to_json_object(dwk_argsString)];
+                                              args:dwk_args
+                                          callback:dwk_callback];
 }
 
 inline NSString * dwk_to_json_string(id dwk_object) {
@@ -163,7 +200,9 @@ inline NSDictionary * dwk_to_json_object(NSString *dwk_json_string) {
                                                             options:NSJSONReadingMutableContainers
                                                               error:&dwk_err];
 
-    if (!dwk_err) return dwk_dic;
+    if (!dwk_err) {
+        return dwk_dic;
+    }
 
 #if DEBUG
     NSLog(@"json解析失败：%@", dwk_err);

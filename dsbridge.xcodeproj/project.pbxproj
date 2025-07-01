@@ -27,6 +27,7 @@
 		81CFC868202C42AA00CF9D83 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 81CFC867202C42AA00CF9D83 /* img */; };
 		81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 81EBBFFD1EF24DDE00D1E4C1 /* README.md */; };
 		B7E708162E13A87300D8072D /* DWKObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = B7E708152E13A87300D8072D /* DWKObjects.m */; };
+		B7E708AC2E13C3A400D8072D /* DWKRunTimeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -86,6 +87,8 @@
 		81EBBFFD1EF24DDE00D1E4C1 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B7E708142E13A87300D8072D /* DWKObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKObjects.h; sourceTree = "<group>"; };
 		B7E708152E13A87300D8072D /* DWKObjects.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKObjects.m; sourceTree = "<group>"; };
+		B7E708AA2E13C3A400D8072D /* DWKRunTimeHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKRunTimeHandler.h; sourceTree = "<group>"; };
+		B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKRunTimeHandler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +137,7 @@
 		818F0B901E18C08100679925 /* dsbridge */ = {
 			isa = PBXGroup;
 			children = (
+				B7E708A92E13BEE500D8072D /* RunTimeHandler */,
 				B7E708A82E13BAA700D8072D /* Core */,
 				818F0B911E18C08100679925 /* dsbridge.h */,
 				815612E92020304600C4F5CD /* InternalApis.h */,
@@ -190,6 +194,15 @@
 				B7E708152E13A87300D8072D /* DWKObjects.m */,
 			);
 			path = Core;
+			sourceTree = "<group>";
+		};
+		B7E708A92E13BEE500D8072D /* RunTimeHandler */ = {
+			isa = PBXGroup;
+			children = (
+				B7E708AA2E13C3A400D8072D /* DWKRunTimeHandler.h */,
+				B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */,
+			);
+			path = RunTimeHandler;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -294,6 +307,7 @@
 				81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */,
 				81CFC8602029456C00CF9D83 /* readme-chs.md in Sources */,
 				B7E708162E13A87300D8072D /* DWKObjects.m in Sources */,
+				B7E708AC2E13C3A400D8072D /* DWKRunTimeHandler.m in Sources */,
 				818F0BC01E18C59200679925 /* DWKUtil.m in Sources */,
 				818F0BB71E18C3B800679925 /* DWKWebView.m in Sources */,
 				815612EB2020304600C4F5CD /* InternalApis.m in Sources */,

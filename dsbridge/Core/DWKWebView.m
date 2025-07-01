@@ -1,11 +1,13 @@
-#import <objc/message.h>
 #import "DWKObjects.h"
-#import "DWKWebView.h"
-//#import "InternalApis.h"
 #import "DWKUtil.h"
+#import "DWKWebView.h"
 #import "DWKWebView.h"
 
 static NSString *const DWK_Event_Prefix = @"_dsbridge=";
+
+static NSString *const DWK_Event_Namespace_Internal = @"_dsb";
+
+static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
 
 @implementation DWKWebView{
     void (^ javascriptCloseWindowListener)(void);
@@ -61,29 +63,59 @@ static NSString *const DWK_Event_Prefix = @"_dsbridge=";
                          initiatedByFrame:(WKFrameInfo *)frame
                         completionHandler:(void (^)(NSString *_Nullable result))completionHandler
 {
-    if ([prompt hasPrefix:DWK_Event_Prefix]) {
-        NSString *dwk_originString = [prompt substringFromIndex:[DWK_Event_Prefix length]];
-        NSString *dwk_result = nil;
-
-        DWKWebViewEvent *dwk_event = DWK_Event_With_Origin(dwk_originString, defaultText);
-
-        if (DWK_CanHandleEvent(dwk_event)) {
-            dwk_result = [self.dwk_eventHandler dwk_webView:self handleEvent:dwk_event];
-        } else {
-            NSLog(@"Cannot handle event: %@", dwk_event);
-            dwk_result = DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
+    if (![prompt hasPrefix:DWK_Event_Prefix]) {
+        if (!DWK_UIDelegatePerformsSelector) {
+            completionHandler(nil);
         }
 
-        completionHandler(dwk_result);
-    } else if (DWK_UIDelegatePerformsSelector) {
         return [self.dwk_uiDelegate              webView:webView
                    runJavaScriptTextInputPanelWithPrompt:prompt
                                              defaultText:defaultText
                                         initiatedByFrame:frame
                                        completionHandler:completionHandler];
-    } else {
-        completionHandler(nil);
     }
+
+    NSString *dwk_originString = [prompt substringFromIndex:[DWK_Event_Prefix length]];
+    __block NSString *dwk_result = nil;
+
+    id dwk_args = DWK_JSONObject(defaultText);
+    id dwk_cb = [dwk_args valueForKey:DWK_Event_Args_Callback];
+    DWKWebViewEvent *dwk_event;
+
+    if (!dwk_cb) {
+        dwk_event = DWK_Event_With_Origin(dwk_originString, dwk_args);
+    } else {
+        DWKEventCallback dwk_handler = [self dwk_eventCallbackWithId:dwk_cb
+                                                    dwk_dataCallback:^(id data, BOOL complete) {
+            NSMutableDictionary *dwk_cbResult = [@{} mutableCopy];
+            [dwk_cbResult setValue:@0
+                            forKey:@"code"];
+
+            if (data != nil) {
+                [dwk_cbResult setValue:data
+                                forKey:@"data"];
+            }
+
+            dwk_result = DWK_JSONString(dwk_cbResult);
+        }];
+
+        dwk_event = DWK_Event_With_Handler(dwk_originString, dwk_args, dwk_handler);
+    }
+
+    if ([dwk_event.dwk_namespace isEqualToString:DWK_Event_Namespace_Internal]) {
+        dwk_result = [self dwk_dispatchInternalEvent:dwk_event];
+        completionHandler(dwk_result);
+        return;
+    }
+
+    if (DWK_CanHandleEvent(dwk_event)) {
+        dwk_result = [self.dwk_eventHandler dwk_webView:self handleEvent:dwk_event];
+    } else {
+        NSLog(@"Cannot handle event: %@", dwk_event);
+        dwk_result = DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
+    }
+
+    completionHandler(dwk_result);
 }
 
 - (void)                           webView:(WKWebView *)webView
@@ -263,10 +295,11 @@ static NSString *const DWK_Event_Prefix = @"_dsbridge=";
 //
 - (void)dispatchJavascriptCall:(DWKCallInfo *)dwk_info {
     id dwk_infoObject = @{
-        @"method": dwk_info.dwk_method,
-        @"callbackId": dwk_info.dwk_id,
-        @"data": DWK_JSONString(dwk_info.dwk_args)
+            @"method": dwk_info.dwk_method,
+            @"callbackId": dwk_info.dwk_id,
+            @"data": DWK_JSONString(dwk_info.dwk_args)
     };
+
     [self evaluateJavaScript:[NSString stringWithFormat:@"window._handleMessageFromNative(%@)", DWK_JSONString(dwk_infoObject)]
            completionHandler:nil];
 }
@@ -429,100 +462,131 @@ static NSString *const DWK_Event_Prefix = @"_dsbridge=";
 //    }
 //}
 //
-//- (id)onMessage:(NSDictionary *)msg type:(int)type {
-//    id ret = nil;
-//
-//    switch (type) {
-//        case DSB_API_HASNATIVEMETHOD:
-//            ret = [self hasNativeMethod:msg] ? @1 : @0;
-//            break;
-//
-//        case DSB_API_CLOSEPAGE:
-//            [self closePage:msg];
-//            break;
-//
-//        case DSB_API_RETURNVALUE:
-//            ret = [self returnValue:msg];
-//            break;
-//
-//        case DSB_API_DSINIT:
-//            ret = [self dsinit:msg];
-//            break;
-//
-//        case DSB_API_DISABLESAFETYALERTBOX:
-//            [self disableJavascriptDialogBlock:[msg[@"disable"] boolValue]];
-//            break;
-//
-//        default:
-//            break;
-//    }
-//    return ret;
-//}
-//
-//- (bool)hasNativeMethod:(NSDictionary *)args
-//{
-//    NSArray *nameStr = [JSBUtil parseNamespace:[args[@"name"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-//    NSString *type = [args[@"type"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-//    id JavascriptInterfaceObject = [javaScriptNamespaceInterfaces objectForKey:nameStr[0]];
-//
-//    if (JavascriptInterfaceObject) {
-//        bool syn = [JSBUtil methodByNameArg:1 selName:nameStr[1] class:[JavascriptInterfaceObject class]] != nil;
-//        bool asyn = [JSBUtil methodByNameArg:2 selName:nameStr[1] class:[JavascriptInterfaceObject class]] != nil;
-//
-//        if (([@"all" isEqualToString:type] && (syn || asyn))
-//            || ([@"asyn" isEqualToString:type] && asyn)
-//            || ([@"syn" isEqualToString:type] && syn)
-//            ) {
-//            return true;
-//        }
-//    }
-//
-//    return false;
-//}
-//
-//- (id)closePage:(NSDictionary *)args {
-//    if (javascriptCloseWindowListener) {
-//        javascriptCloseWindowListener();
-//    }
-//
-//    return nil;
-//}
-//
-//- (id)returnValue:(NSDictionary *)args {
-//    void (^ completionHandler)(NSString *_Nullable) = handerMap[args[@"id"]];
-//
-//    if (completionHandler) {
-//        if (isDebug) {
-//            completionHandler(args[@"data"]);
-//        } else {
-//            @try {
-//                completionHandler(args[@"data"]);
-//            } @catch (NSException *e) {
-//                NSLog(@"%@", e);
-//            }
-//        }
-//
-//        if ([args[@"complete"] boolValue]) {
-//            [handerMap removeObjectForKey:args[@"id"]];
-//        }
-//    }
-//
-//    return nil;
-//}
-//
-//- (id)dsinit:(NSDictionary *)args {
-//    [self dispatchStartupQueue];
-//    return nil;
-//}
-//
-//- (void)hasJavascriptMethod:(NSString *)handlerName
-//        methodExistCallback:(void (^)(bool exist))callback
-//{
-//    [self     callHandler:@"_hasJavascriptMethod"
-//                arguments:@[handlerName]
-//        completionHandler:^(NSNumber *_Nullable value) {
-//        callback([value boolValue]);
-//    }];
-//}
-//
+
+#pragma mark: - callback
+- (DWKEventCallback)dwk_eventCallbackWithId:(id)dwk_cb
+                           dwk_dataCallback:(void (^)(id data, BOOL complete))dwk_dataCallback
+{
+    __weak typeof(self) weakSelf = self;
+    return ^(id dwk_value, BOOL dwk_complete) {
+               if (!dwk_dataCallback) {
+                   dwk_dataCallback(dwk_value, dwk_complete);
+               }
+
+               NSString *dwk_del = @"";
+
+               NSString *dwk_retValue = [DWK_JSONString(dwk_value) stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+
+               if (dwk_complete) {
+                   dwk_del = [@"delete window." stringByAppendingString:dwk_cb];
+               }
+
+               NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent(\"%@\")).data);%@; } catch(e){};", dwk_cb, (dwk_value == nil) ? @"" : dwk_value, dwk_del];
+               __strong typeof(self) strongSelf = weakSelf;
+               @synchronized(self)
+               {
+                   UInt64 t = [[NSDate date] timeIntervalSince1970] * 1000;
+                   jsCache = [jsCache stringByAppendingString:js];
+
+                   if (t - lastCallTime < 50) {
+                       if (!isPending) {
+                           [strongSelf evalJavascript:50];
+                           isPending = true;
+                       }
+                   } else {
+                       [strongSelf evalJavascript:0];
+                   }
+               }
+    };
+}
+
+#pragma mark: - Internal Event Handling
+/// 内部事件处理
+- (NSString *)dwk_dispatchInternalEvent:(DWKWebViewEvent *)dwk_event {
+    if (!dwk_event) {
+        return DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
+    }
+
+    if (![dwk_event.dwk_namespace isEqualToString:DWK_Event_Namespace_Internal]) {
+        return DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
+    }
+
+    id dwk_data = nil;
+
+    if ([dwk_event.dwk_method isEqualToString:@"closePage"]) {
+        dwk_data = [self closePage:dwk_event.dwk_args];
+    } else if ([dwk_event.dwk_method isEqualToString:@"returnValue"]) {
+        dwk_data = [self returnValue:dwk_event.dwk_args];
+    } else if ([dwk_event.dwk_method isEqualToString:@"hasNativeMethod"]) {
+        dwk_data = [self hasNativeMethod:dwk_event.dwk_args];
+    } else if ([dwk_event.dwk_method isEqualToString:@"dsinit"]) {
+        dwk_data = [self dsinit:dwk_event.dwk_args];
+    }
+
+    return DWK_JSONString((@{ @"code": @0, @"data": dwk_data ? : @"" }));
+}
+
+- (id)hasNativeMethod:(id)args {
+    NSString *dwk_name = [args valueForKey:@"name"];
+
+    if (!dwk_name.length) {
+        return @(NO);
+    }
+
+    dwk_name = [dwk_name stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    DWKWebViewEvent *dwk_webEvent = DWK_Event_With_Origin(dwk_name, @{});
+    DWKWebViewEvent *dwk_webEventWithHandler = DWK_Event_With_Handler(dwk_name, @{}, ^(id dwk_data, BOOL dwk_complete) {});
+
+    NSString *type = [[args valueForKey:@"type"] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+
+    BOOL dwk_retValue = NO;
+
+    if ([type isEqualToString:@"all"]) {
+        dwk_retValue =  DWK_CanHandleEvent(dwk_webEvent) || DWK_CanHandleEvent(dwk_webEventWithHandler);
+    } else if ([type isEqualToString:@"asyn"]) {
+        dwk_retValue =  DWK_CanHandleEvent(dwk_webEventWithHandler);
+    } else if ([type isEqualToString:@"syn"]) {
+        dwk_retValue = DWK_CanHandleEvent(dwk_webEvent);
+    } else {
+        dwk_retValue = NO;
+    }
+
+    return @(dwk_retValue);
+}
+
+- (id)closePage:(id)args {
+    if (javascriptCloseWindowListener) {
+        javascriptCloseWindowListener();
+    }
+
+    return nil;
+}
+
+- (id)returnValue:(id)args {
+    void (^ completionHandler)(NSString *_Nullable) = handerMap[args[@"id"]];
+
+    if (completionHandler) {
+        if (isDebug) {
+            completionHandler(args[@"data"]);
+        } else {
+            @try {
+                completionHandler(args[@"data"]);
+            } @catch (NSException *e) {
+                NSLog(@"%@", e);
+            }
+        }
+
+        if ([args[@"complete"] boolValue]) {
+            [handerMap removeObjectForKey:args[@"id"]];
+        }
+    }
+
+    return nil;
+}
+
+- (id)dsinit:(id)args {
+    [self dispatchStartupQueue];
+    return nil;
+}
+
 @end

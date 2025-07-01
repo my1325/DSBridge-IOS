@@ -9,12 +9,13 @@
 #import <WebKit/WebKit.h>
 
 @class DWKWebView, DWKWebViewEvent;
+
 @protocol DWKWebViewHandler <NSObject>
 - (BOOL)dwk_webView:(DWKWebView *_Nonnull)webView
      canHandleEvent:(DWKWebViewEvent *_Nonnull)eventName;
 
 - (id _Nullable)dwk_webView:(DWKWebView *_Nonnull)webView
-      handleEvent:(DWKWebViewEvent *_Nonnull)eventName;
+                handleEvent:(DWKWebViewEvent *_Nonnull)eventName;
 @end
 
 typedef void (^JSCallback)(NSString *_Nullable result, BOOL complete);
@@ -38,16 +39,17 @@ typedef void (^JSCallback)(NSString *_Nullable result, BOOL complete);
             arguments:(NSArray *_Nullable)args
     completionHandler:(void (^_Nullable)(id _Nullable value))completionHandler;
 
-
-// Test whether the handler exist in javascript
 - (void)hasJavascriptMethod:(NSString *_Nonnull)handlerName
         methodExistCallback:(void (^_Nullable)(bool exist))callback;
 
-// Set debug mode. if in debug mode, some errors will be prompted by a dialog
-// and the exception caused by the native handlers will not be captured.
 - (void)setDebugMode:(bool)debug;
 
-// private method, the developer shoudn't call this method
-//- (id _Nullable)onMessage:(NSDictionary *_Nonnull)msg type:(int)type;
+#pragma mark: - web的系统事件
+- (id _Nullable)hasNativeMethod:(NSDictionary *_Nullable)args;
 
+- (id _Nullable)closePage:(NSDictionary *_Nullable)args;
+
+- (id _Nullable)returnValue:(NSDictionary *_Nullable)args;
+
+- (id _Nullable)dsinit:(NSDictionary *_Nullable)args;
 @end

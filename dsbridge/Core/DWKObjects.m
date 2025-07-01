@@ -14,10 +14,22 @@
                                 method:(NSString *)dwk_method
                                   args:(id)dwk_args
 {
+   return [self dwk_eventWithNamespace:dwk_namespace
+                                method:dwk_method
+                                  args:dwk_args
+                              callback:nil];
+}
+
++ (instancetype)dwk_eventWithNamespace:(NSString *)dwk_namespace
+                                method:(NSString *)dwk_method
+                                  args:(id)dwk_args
+                              callback:(DWKEventCallback)dwk_callback
+{
     DWKWebViewEvent *dwk_event = [[DWKWebViewEvent alloc] init];
     dwk_event.dwk_namespace = dwk_namespace;
     dwk_event.dwk_method = dwk_method;
     dwk_event.dwk_args = dwk_args;
+    dwk_event.dwk_callback = dwk_callback;
     return dwk_event;
 }
 
@@ -29,7 +41,7 @@
                                 dwk_id:(NSNumber *)dwk_id
                               dwk_args:(NSArray *)dwk_args
 {
-    DSCallInfo *dwk_callInfo = [[DSCallInfo alloc] init];
+    DWKCallInfo *dwk_callInfo = [[DWKCallInfo alloc] init];
     dwk_callInfo.dwk_method = dwk_method;
     dwk_callInfo.dwk_id = dwk_id;
     dwk_callInfo.dwk_args = dwk_args;
