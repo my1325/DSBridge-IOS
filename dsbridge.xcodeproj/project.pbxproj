@@ -7,11 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8142EA1E214212E700BEE5C0 /* JsApiTestSwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8142EA1D214212E700BEE5C0 /* JsApiTestSwift.swift */; };
 		815612EB2020304600C4F5CD /* InternalApis.m in Sources */ = {isa = PBXBuildFile; fileRef = 815612EA2020304600C4F5CD /* InternalApis.m */; };
-		815612EE202041B000C4F5CD /* DSCallInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 815612ED202041B000C4F5CD /* DSCallInfo.m */; };
 		815612F12022E42D00C4F5CD /* JsEchoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 815612F02022E42D00C4F5CD /* JsEchoApi.m */; };
-		815FCC931E1CE48F0073CA79 /* JSBUtil.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0BBE1E18C59200679925 /* JSBUtil.h */; };
+		815FCC931E1CE48F0073CA79 /* DWKUtil.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0BBE1E18C59200679925 /* DWKUtil.h */; };
 		818F0B941E18C08100679925 /* dsbridge.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0B911E18C08100679925 /* dsbridge.h */; };
 		818F0BA21E18C0AA00679925 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BA11E18C0AA00679925 /* main.m */; };
 		818F0BA51E18C0AA00679925 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BA41E18C0AA00679925 /* AppDelegate.m */; };
@@ -20,7 +18,7 @@
 		818F0BAD1E18C0AA00679925 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 818F0BAC1E18C0AA00679925 /* Assets.xcassets */; };
 		818F0BB01E18C0AA00679925 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 818F0BAE1E18C0AA00679925 /* LaunchScreen.storyboard */; };
 		818F0BB71E18C3B800679925 /* DWKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BB51E18C3B800679925 /* DWKWebView.m */; };
-		818F0BC01E18C59200679925 /* JSBUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BBF1E18C59200679925 /* JSBUtil.m */; };
+		818F0BC01E18C59200679925 /* DWKUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BBF1E18C59200679925 /* DWKUtil.m */; };
 		818F0BC41E18D44A00679925 /* DWKWebView.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0BB61E18C3B800679925 /* DWKWebView.h */; };
 		818F0BC91E18DD3600679925 /* JsApiTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BC81E18DD3600679925 /* JsApiTest.m */; };
 		818F0BCD1E18E6D200679925 /* libdsbridge.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 818F0B8E1E18C08100679925 /* libdsbridge.a */; };
@@ -28,6 +26,7 @@
 		81CFC8602029456C00CF9D83 /* readme-chs.md in Sources */ = {isa = PBXBuildFile; fileRef = 81CFC85F2029456C00CF9D83 /* readme-chs.md */; };
 		81CFC868202C42AA00CF9D83 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 81CFC867202C42AA00CF9D83 /* img */; };
 		81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 81EBBFFD1EF24DDE00D1E4C1 /* README.md */; };
+		B7E708162E13A87300D8072D /* DWKObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = B7E708152E13A87300D8072D /* DWKObjects.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,7 +46,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
-				815FCC931E1CE48F0073CA79 /* JSBUtil.h in CopyFiles */,
+				815FCC931E1CE48F0073CA79 /* DWKUtil.h in CopyFiles */,
 				818F0BC41E18D44A00679925 /* DWKWebView.h in CopyFiles */,
 				818F0B941E18C08100679925 /* dsbridge.h in CopyFiles */,
 			);
@@ -56,13 +55,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		812F1D3B216F1F9D00B5BD0C /* publish.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = publish.sh; sourceTree = "<group>"; };
 		8142EA1C214212E600BEE5C0 /* dsbridgedemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "dsbridgedemo-Bridging-Header.h"; sourceTree = "<group>"; };
-		8142EA1D214212E700BEE5C0 /* JsApiTestSwift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsApiTestSwift.swift; sourceTree = "<group>"; };
 		815612E92020304600C4F5CD /* InternalApis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InternalApis.h; sourceTree = "<group>"; };
 		815612EA2020304600C4F5CD /* InternalApis.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InternalApis.m; sourceTree = "<group>"; };
-		815612EC202041B000C4F5CD /* DSCallInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DSCallInfo.h; sourceTree = "<group>"; };
-		815612ED202041B000C4F5CD /* DSCallInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DSCallInfo.m; sourceTree = "<group>"; };
 		815612EF2022E42D00C4F5CD /* JsEchoApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsEchoApi.h; sourceTree = "<group>"; };
 		815612F02022E42D00C4F5CD /* JsEchoApi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsEchoApi.m; sourceTree = "<group>"; };
 		818F0B8E1E18C08100679925 /* libdsbridge.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libdsbridge.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -79,8 +74,8 @@
 		818F0BB11E18C0AA00679925 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		818F0BB51E18C3B800679925 /* DWKWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWKWebView.m; sourceTree = "<group>"; };
 		818F0BB61E18C3B800679925 /* DWKWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWKWebView.h; sourceTree = "<group>"; };
-		818F0BBE1E18C59200679925 /* JSBUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSBUtil.h; sourceTree = "<group>"; };
-		818F0BBF1E18C59200679925 /* JSBUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSBUtil.m; sourceTree = "<group>"; };
+		818F0BBE1E18C59200679925 /* DWKUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DWKUtil.h; sourceTree = "<group>"; };
+		818F0BBF1E18C59200679925 /* DWKUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DWKUtil.m; sourceTree = "<group>"; };
 		818F0BC81E18DD3600679925 /* JsApiTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsApiTest.m; sourceTree = "<group>"; };
 		818F0BCB1E18DE7100679925 /* JsApiTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JsApiTest.h; sourceTree = "<group>"; };
 		818F0BCF1E1A820B00679925 /* test.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = test.html; sourceTree = "<group>"; };
@@ -89,6 +84,8 @@
 		81CFC867202C42AA00CF9D83 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		81EBBFF71EF246BD00D1E4C1 /* dsBridge.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsBridge.podspec; sourceTree = "<group>"; };
 		81EBBFFD1EF24DDE00D1E4C1 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		B7E708142E13A87300D8072D /* DWKObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKObjects.h; sourceTree = "<group>"; };
+		B7E708152E13A87300D8072D /* DWKObjects.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKObjects.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,7 +110,6 @@
 		818F0B851E18C08100679925 = {
 			isa = PBXGroup;
 			children = (
-				812F1D3B216F1F9D00B5BD0C /* publish.sh */,
 				81CFC867202C42AA00CF9D83 /* img */,
 				81CFC861202953CB00CF9D83 /* .travis.yml */,
 				81CFC85F2029456C00CF9D83 /* readme-chs.md */,
@@ -138,15 +134,10 @@
 		818F0B901E18C08100679925 /* dsbridge */ = {
 			isa = PBXGroup;
 			children = (
-				818F0BB61E18C3B800679925 /* DWKWebView.h */,
-				818F0BB51E18C3B800679925 /* DWKWebView.m */,
+				B7E708A82E13BAA700D8072D /* Core */,
 				818F0B911E18C08100679925 /* dsbridge.h */,
-				818F0BBE1E18C59200679925 /* JSBUtil.h */,
-				818F0BBF1E18C59200679925 /* JSBUtil.m */,
 				815612E92020304600C4F5CD /* InternalApis.h */,
 				815612EA2020304600C4F5CD /* InternalApis.m */,
-				815612EC202041B000C4F5CD /* DSCallInfo.h */,
-				815612ED202041B000C4F5CD /* DSCallInfo.m */,
 			);
 			path = dsbridge;
 			sourceTree = "<group>";
@@ -168,7 +159,6 @@
 				818F0BCF1E1A820B00679925 /* test.html */,
 				815612EF2022E42D00C4F5CD /* JsEchoApi.h */,
 				815612F02022E42D00C4F5CD /* JsEchoApi.m */,
-				8142EA1D214212E700BEE5C0 /* JsApiTestSwift.swift */,
 				8142EA1C214212E600BEE5C0 /* dsbridgedemo-Bridging-Header.h */,
 			);
 			path = dsbridgedemo;
@@ -187,6 +177,19 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		B7E708A82E13BAA700D8072D /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				818F0BB61E18C3B800679925 /* DWKWebView.h */,
+				818F0BB51E18C3B800679925 /* DWKWebView.m */,
+				818F0BBE1E18C59200679925 /* DWKUtil.h */,
+				818F0BBF1E18C59200679925 /* DWKUtil.m */,
+				B7E708142E13A87300D8072D /* DWKObjects.h */,
+				B7E708152E13A87300D8072D /* DWKObjects.m */,
+			);
+			path = Core;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -253,6 +256,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -289,9 +293,9 @@
 			files = (
 				81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */,
 				81CFC8602029456C00CF9D83 /* readme-chs.md in Sources */,
-				818F0BC01E18C59200679925 /* JSBUtil.m in Sources */,
+				B7E708162E13A87300D8072D /* DWKObjects.m in Sources */,
+				818F0BC01E18C59200679925 /* DWKUtil.m in Sources */,
 				818F0BB71E18C3B800679925 /* DWKWebView.m in Sources */,
-				815612EE202041B000C4F5CD /* DSCallInfo.m in Sources */,
 				815612EB2020304600C4F5CD /* InternalApis.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -305,7 +309,6 @@
 				818F0BA51E18C0AA00679925 /* AppDelegate.m in Sources */,
 				815612F12022E42D00C4F5CD /* JsEchoApi.m in Sources */,
 				818F0BA21E18C0AA00679925 /* main.m in Sources */,
-				8142EA1E214212E700BEE5C0 /* JsApiTestSwift.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
