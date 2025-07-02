@@ -12,10 +12,10 @@
 
 @protocol DWKWebViewHandler <NSObject>
 - (BOOL)dwk_webView:(DWKWebView *_Nonnull)webView
-     canHandleEvent:(DWKWebViewEvent *_Nonnull)eventName;
+     canHandleEvent:(DWKWebViewEvent *_Nonnull)event;
 
 - (id _Nullable)dwk_webView:(DWKWebView *_Nonnull)webView
-                handleEvent:(DWKWebViewEvent *_Nonnull)eventName;
+                handleEvent:(DWKWebViewEvent *_Nonnull)event;
 @end
 
 typedef void (^JSCallback)(NSString *_Nullable result, BOOL complete);
