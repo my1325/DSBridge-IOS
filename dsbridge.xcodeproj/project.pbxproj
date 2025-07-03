@@ -28,6 +28,7 @@
 		81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = 81EBBFFD1EF24DDE00D1E4C1 /* README.md */; };
 		B7E708162E13A87300D8072D /* DWKObjects.m in Sources */ = {isa = PBXBuildFile; fileRef = B7E708152E13A87300D8072D /* DWKObjects.m */; };
 		B7E708AC2E13C3A400D8072D /* DWKRunTimeHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */; };
+		B7F28DE62E152E1400F33B2E /* DWKSelMapHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = B7F28DE52E152E1400F33B2E /* DWKSelMapHandler.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,12 +84,14 @@
 		81CFC85F2029456C00CF9D83 /* readme-chs.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "readme-chs.md"; sourceTree = "<group>"; };
 		81CFC861202953CB00CF9D83 /* .travis.yml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .travis.yml; sourceTree = "<group>"; };
 		81CFC867202C42AA00CF9D83 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
-		81EBBFF71EF246BD00D1E4C1 /* dsBridge.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dsBridge.podspec; sourceTree = "<group>"; };
+		81EBBFF71EF246BD00D1E4C1 /* DSBridge.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DSBridge.podspec; sourceTree = "<group>"; };
 		81EBBFFD1EF24DDE00D1E4C1 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		B7E708142E13A87300D8072D /* DWKObjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKObjects.h; sourceTree = "<group>"; };
 		B7E708152E13A87300D8072D /* DWKObjects.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKObjects.m; sourceTree = "<group>"; };
 		B7E708AA2E13C3A400D8072D /* DWKRunTimeHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKRunTimeHandler.h; sourceTree = "<group>"; };
 		B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKRunTimeHandler.m; sourceTree = "<group>"; };
+		B7F28DE42E152E1400F33B2E /* DWKSelMapHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DWKSelMapHandler.h; sourceTree = "<group>"; };
+		B7F28DE52E152E1400F33B2E /* DWKSelMapHandler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DWKSelMapHandler.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,8 +120,8 @@
 				81CFC861202953CB00CF9D83 /* .travis.yml */,
 				81CFC85F2029456C00CF9D83 /* readme-chs.md */,
 				81EBBFFD1EF24DDE00D1E4C1 /* README.md */,
-				81EBBFF71EF246BD00D1E4C1 /* dsBridge.podspec */,
-				818F0B901E18C08100679925 /* dsbridge */,
+				81EBBFF71EF246BD00D1E4C1 /* DSBridge.podspec */,
+				818F0B901E18C08100679925 /* DSBridge */,
 				818F0B9F1E18C0AA00679925 /* dsbridgedemo */,
 				818F0B8F1E18C08100679925 /* Products */,
 				81EBBFFA1EF24A7300D1E4C1 /* Frameworks */,
@@ -134,16 +137,17 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		818F0B901E18C08100679925 /* dsbridge */ = {
+		818F0B901E18C08100679925 /* DSBridge */ = {
 			isa = PBXGroup;
 			children = (
+				B7F28DE32E152DFD00F33B2E /* SelMapHandler */,
 				B7E708A92E13BEE500D8072D /* RunTimeHandler */,
 				B7E708A82E13BAA700D8072D /* Core */,
 				818F0B911E18C08100679925 /* dsbridge.h */,
 				815612E92020304600C4F5CD /* InternalApis.h */,
 				815612EA2020304600C4F5CD /* InternalApis.m */,
 			);
-			path = dsbridge;
+			path = DSBridge;
 			sourceTree = "<group>";
 		};
 		818F0B9F1E18C0AA00679925 /* dsbridgedemo */ = {
@@ -203,6 +207,15 @@
 				B7E708AB2E13C3A400D8072D /* DWKRunTimeHandler.m */,
 			);
 			path = RunTimeHandler;
+			sourceTree = "<group>";
+		};
+		B7F28DE32E152DFD00F33B2E /* SelMapHandler */ = {
+			isa = PBXGroup;
+			children = (
+				B7F28DE42E152E1400F33B2E /* DWKSelMapHandler.h */,
+				B7F28DE52E152E1400F33B2E /* DWKSelMapHandler.m */,
+			);
+			path = SelMapHandler;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -307,6 +320,7 @@
 				81EBBFFF1EF24DDE00D1E4C1 /* README.md in Sources */,
 				81CFC8602029456C00CF9D83 /* readme-chs.md in Sources */,
 				B7E708162E13A87300D8072D /* DWKObjects.m in Sources */,
+				B7F28DE62E152E1400F33B2E /* DWKSelMapHandler.m in Sources */,
 				B7E708AC2E13C3A400D8072D /* DWKRunTimeHandler.m in Sources */,
 				818F0BC01E18C59200679925 /* DWKUtil.m in Sources */,
 				818F0BB71E18C3B800679925 /* DWKWebView.m in Sources */,

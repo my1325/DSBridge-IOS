@@ -80,6 +80,7 @@
 
 - (SEL)dwk_selectorForMethod:(NSString *)dwk_methodName
                hasCompletion:(BOOL)dwk_hasCompletion {
+    NSLog(@"%s: dwk_methodName: %@", __FUNCTION__, dwk_methodName);
     if (!dwk_methodName.length || !self.dwk_object) {
         return nil;
     }
@@ -95,7 +96,7 @@
         // Check if the method matches the expected format
         NSInteger dwk_colonCount = [dwk_selectorString componentsSeparatedByString:@":"].count - 1;
 
-        if (!dwk_hasCompletion || dwk_colonCount == 2) {
+        if (!dwk_hasCompletion || dwk_colonCount >= 2) {
             // no completion
             dwk_retSelector = dwk_selectorString;
             break;
@@ -117,30 +118,39 @@
 - (id)dwk_invokeWithSelector:(NSString *)dwk_selectorName
                    arguments:(NSArray *)arguments
            completionHandler:(void (^)(id, BOOL))completionHandler {
-    SEL dwk_selector = [self dwk_selectorForMethod:dwk_selectorName hasCompletion:completionHandler != nil];
+    NSLog(@"%s: dwk_methodName: %@", __FUNCTION__, dwk_selectorName);
 
+    SEL dwk_selector = [self dwk_selectorForMethod:dwk_selectorName hasCompletion:completionHandler != nil];
     if (!dwk_selector) {
         if (completionHandler) completionHandler(nil, NO);
         return nil;
     }
     
-    if (!completionHandler) {
+    id args = arguments ?: @[];
+    NSInteger dwk_colonCount = [NSStringFromSelector(dwk_selector) componentsSeparatedByString:@":"].count - 1;
+
+    if (dwk_colonCount >= 2) {
+        id dwk_callback = completionHandler ?: ^(id result, BOOL success) {
+            // Default completion handler if none provided
+            NSLog(@"Default completion handler called with result: %@, success: %d", result, success);
+        };
+        
         void (*dwk_action)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
-        dwk_action(_dwk_object, dwk_selector, arguments, completionHandler);
+        dwk_action(_dwk_object, dwk_selector, args, dwk_callback);
         return nil;
     }
 
     Method method1 = class_getInstanceMethod([_dwk_object class], dwk_selector);
     char retType[10];
     method_getReturnType(method1, retType, 10);
-
+    
     if (strcmp("v", retType) == 0) {
         void (*dwk_action)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
-        dwk_action(_dwk_object, dwk_selector, arguments);
+        dwk_action(_dwk_object, dwk_selector, args);
         return nil;
     } else {
         id (*dwk_action)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
-        id dwk_ret = dwk_action(_dwk_object, dwk_selector, arguments);
+        id dwk_ret = dwk_action(_dwk_object, dwk_selector, args);
         return dwk_ret;
     }
 }

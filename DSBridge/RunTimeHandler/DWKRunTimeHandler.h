@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NSString * _Nonnull DWKNamespace;
-@interface DWKRunTimeHandler : NSObject
+@interface DWKRunTimeHandler : NSObject<DWKWebViewHandler>
 
 @property (nonatomic, strong, readonly) NSDictionary *dwk_javascriptObjects;
 

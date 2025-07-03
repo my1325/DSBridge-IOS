@@ -83,7 +83,7 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
     DWKWebViewEvent *dwk_event;
 
     if (!dwk_cb) {
-        dwk_event = DWK_Event_With_Origin(dwk_originString, dwk_args);
+        dwk_event = DWK_Event_With_Origin(dwk_originString, [dwk_args valueForKey:@"data"]);
     } else {
         DWKEventCallback dwk_handler = [self dwk_eventCallbackWithId:dwk_cb
                                                     dwk_dataCallback:^(id data, BOOL complete) {
@@ -99,7 +99,7 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
             dwk_result = DWK_JSONString(dwk_cbResult);
         }];
 
-        dwk_event = DWK_Event_With_Handler(dwk_originString, dwk_args, dwk_handler);
+        dwk_event = DWK_Event_With_Handler(dwk_originString, [dwk_args valueForKey:@"data"], dwk_handler);
     }
 
     if ([dwk_event.dwk_namespace isEqualToString:DWK_Event_Namespace_Internal]) {
@@ -109,7 +109,12 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
     }
 
     if (DWK_CanHandleEvent(dwk_event)) {
-        dwk_result = [self.dwk_eventHandler dwk_webView:self handleEvent:dwk_event];
+        id dwk_data = [self.dwk_eventHandler dwk_webView:self handleEvent:dwk_event];
+        NSMutableDictionary *dwk_cbResult = [@{ @"code": @0 } mutableCopy];
+        if (dwk_data) {
+            [dwk_cbResult setValue:dwk_data forKey:@"data"];
+        }
+        dwk_result = DWK_JSONString(dwk_data);
     } else {
         NSLog(@"Cannot handle event: %@", dwk_event);
         dwk_result = DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
@@ -185,36 +190,36 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
     }
 }
 
-- (BOOL)         webView:(WKWebView *)webView
-    shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
-{
-    if (DWK_UIDelegatePerformsSelector) {
-        return [self.dwk_uiDelegate webView:webView shouldPreviewElement:elementInfo];
-    }
-
-    return NO;
-}
-
-- (UIViewController *)         webView:(WKWebView *)webView
-    previewingViewControllerForElement:(WKPreviewElementInfo *)elementInfo
-                        defaultActions:(NSArray<id<WKPreviewActionItem> > *)previewActions
-{
-    if (DWK_UIDelegatePerformsSelector) {
-        return [self.dwk_uiDelegate           webView:webView
-                   previewingViewControllerForElement:elementInfo
-                                       defaultActions:previewActions];
-    }
-
-    return nil;
-}
-
-- (void)                   webView:(WKWebView *)webView
-    commitPreviewingViewController:(UIViewController *)previewingViewController
-{
-    if (DWK_UIDelegatePerformsSelector) {
-        return [self.dwk_uiDelegate webView:webView commitPreviewingViewController:previewingViewController];
-    }
-}
+//- (BOOL)         webView:(WKWebView *)webView
+//    shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
+//{
+//    if (DWK_UIDelegatePerformsSelector) {
+//        return [self.dwk_uiDelegate webView:webView shouldPreviewElement:elementInfo];
+//    }
+//
+//    return NO;
+//}
+//
+//- (UIViewController *)         webView:(WKWebView *)webView
+//    previewingViewControllerForElement:(WKPreviewElementInfo *)elementInfo
+//                        defaultActions:(NSArray<id<WKPreviewActionItem> > *)previewActions
+//{
+//    if (DWK_UIDelegatePerformsSelector) {
+//        return [self.dwk_uiDelegate           webView:webView
+//                   previewingViewControllerForElement:elementInfo
+//                                       defaultActions:previewActions];
+//    }
+//
+//    return nil;
+//}
+//
+//- (void)                   webView:(WKWebView *)webView
+//    commitPreviewingViewController:(UIViewController *)previewingViewController
+//{
+//    if (DWK_UIDelegatePerformsSelector) {
+//        return [self.dwk_uiDelegate webView:webView commitPreviewingViewController:previewingViewController];
+//    }
+//}
 
 #undef DWK_UIDelegatePerformsSelector
 
@@ -224,11 +229,12 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
 {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         @synchronized(self) {
-            if ([jsCache length] != 0) {
-                [self evaluateJavaScript:jsCache completionHandler:nil];
-                isPending = false;
-                jsCache = @"";
-                lastCallTime = [[NSDate date] timeIntervalSince1970] * 1000;
+            if ([self->jsCache length] != 0) {
+                NSLog(@"Eval Javascript: %@", self->jsCache);
+                [self evaluateJavaScript:self->jsCache completionHandler:nil];
+                self->isPending = false;
+                self->jsCache = @"";
+                self->lastCallTime = [[NSDate date] timeIntervalSince1970] * 1000;
             }
         }
     });
@@ -474,24 +480,28 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
                }
 
                NSString *dwk_del = @"";
+               NSDictionary *dwk_data = @{
+                       @"code": @0,
+                       @"data": dwk_value ? : @""
+               };
 
-               NSString *dwk_retValue = [DWK_JSONString(dwk_value) stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+               NSString *dwk_retValue = [DWK_JSONString(dwk_data) stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 
                if (dwk_complete) {
                    dwk_del = [@"delete window." stringByAppendingString:dwk_cb];
                }
 
-               NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent(\"%@\")).data);%@; } catch(e){};", dwk_cb, (dwk_value == nil) ? @"" : dwk_value, dwk_del];
+               NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent(\"%@\")).data);%@; } catch(e){};", dwk_cb, (dwk_retValue == nil) ? @"" : dwk_retValue, dwk_del];
                __strong typeof(self) strongSelf = weakSelf;
                @synchronized(self)
                {
                    UInt64 t = [[NSDate date] timeIntervalSince1970] * 1000;
-                   jsCache = [jsCache stringByAppendingString:js];
+                   self->jsCache = [self->jsCache stringByAppendingString:js];
 
-                   if (t - lastCallTime < 50) {
-                       if (!isPending) {
+                   if (t - self->lastCallTime < 50) {
+                       if (!self->isPending) {
                            [strongSelf evalJavascript:50];
-                           isPending = true;
+                           self->isPending = true;
                        }
                    } else {
                        [strongSelf evalJavascript:0];
