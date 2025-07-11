@@ -116,7 +116,7 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
         }
         dwk_result = DWK_JSONString(dwk_cbResult);
     } else {
-        NSLog(@"Cannot handle event: %@", dwk_event);
+        DWKLog(@"Cannot handle event: %@", dwk_event);
         dwk_result = DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
     }
 
@@ -190,37 +190,6 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
     }
 }
 
-//- (BOOL)         webView:(WKWebView *)webView
-//    shouldPreviewElement:(WKPreviewElementInfo *)elementInfo
-//{
-//    if (DWK_UIDelegatePerformsSelector) {
-//        return [self.dwk_uiDelegate webView:webView shouldPreviewElement:elementInfo];
-//    }
-//
-//    return NO;
-//}
-//
-//- (UIViewController *)         webView:(WKWebView *)webView
-//    previewingViewControllerForElement:(WKPreviewElementInfo *)elementInfo
-//                        defaultActions:(NSArray<id<WKPreviewActionItem> > *)previewActions
-//{
-//    if (DWK_UIDelegatePerformsSelector) {
-//        return [self.dwk_uiDelegate           webView:webView
-//                   previewingViewControllerForElement:elementInfo
-//                                       defaultActions:previewActions];
-//    }
-//
-//    return nil;
-//}
-//
-//- (void)                   webView:(WKWebView *)webView
-//    commitPreviewingViewController:(UIViewController *)previewingViewController
-//{
-//    if (DWK_UIDelegatePerformsSelector) {
-//        return [self.dwk_uiDelegate webView:webView commitPreviewingViewController:previewingViewController];
-//    }
-//}
-
 #undef DWK_UIDelegatePerformsSelector
 
 #pragma mark: - Public Methods
@@ -230,7 +199,7 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_MSEC)), dispatch_get_main_queue(), ^{
         @synchronized(self) {
             if ([self->jsCache length] != 0) {
-                NSLog(@"Eval Javascript: %@", self->jsCache);
+                DWKLog(@"Eval Javascript: %@", self->jsCache);
                 [self evaluateJavaScript:self->jsCache completionHandler:nil];
                 self->isPending = false;
                 self->jsCache = @"";
@@ -319,155 +288,6 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
         callback([value boolValue]);
     }];
 }
-
-//- (NSString *)call:(NSString *)method:(NSString *)argStr
-//{
-//    NSArray *nameStr = [JSBUtil parseNamespace:[method stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
-//
-//    id JavascriptInterfaceObject = javaScriptNamespaceInterfaces[nameStr[0]];
-//    NSString *error = [NSString stringWithFormat:@"Error! \n Method %@ is not invoked, since there is not a implementation for it", method];
-//    NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:@{ @"code": @-1, @"data": @"" }];
-//
-//    if (!JavascriptInterfaceObject) {
-//        NSLog(@"Js bridge  called, but can't find a corresponded JavascriptObject , please check your code!");
-//    } else {
-//        method = nameStr[1];
-//        NSString *methodOne = [JSBUtil methodByNameArg:1 selName:method class:[JavascriptInterfaceObject class]];
-//        NSString *methodTwo = [JSBUtil methodByNameArg:2 selName:method class:[JavascriptInterfaceObject class]];
-//        SEL sel = NSSelectorFromString(methodOne);
-//        SEL selasyn = NSSelectorFromString(methodTwo);
-//        NSDictionary *args = [JSBUtil jsonStringToObject:argStr];
-//        id arg = args[@"data"];
-//
-//        if (arg == [NSNull null]) {
-//            arg = nil;
-//        }
-//
-//        NSString *cb;
-//        do{
-//            if (args && (cb = args[@"_dscbstub"])) {
-//                if ([JavascriptInterfaceObject respondsToSelector:selasyn]) {
-//                    __weak typeof(self) weakSelf = self;
-//                    void (^ completionHandler)(id, BOOL) = ^(id value, BOOL complete) {
-//                        NSString *del = @"";
-//                        result[@"code"] = @0;
-//
-//                        if (value != nil) {
-//                            result[@"data"] = value;
-//                        }
-//
-//                        value = [JSBUtil objToJsonString:result];
-//                        value = [value stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-//
-//                        if (complete) {
-//                            del = [@"delete window." stringByAppendingString:cb];
-//                        }
-//
-//                        NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent(\"%@\")).data);%@; } catch(e){};", cb, (value == nil) ? @"" : value, del];
-//                        __strong typeof(self) strongSelf = weakSelf;
-//                        @synchronized(self)
-//                        {
-//                            UInt64 t = [[NSDate date] timeIntervalSince1970] * 1000;
-//                            jsCache = [jsCache stringByAppendingString:js];
-//
-//                            if (t - lastCallTime < 50) {
-//                                if (!isPending) {
-//                                    [strongSelf evalJavascript:50];
-//                                    isPending = true;
-//                                }
-//                            } else {
-//                                [strongSelf evalJavascript:0];
-//                            }
-//                        }
-//                    };
-//
-//                    void (*action)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
-//                    action(JavascriptInterfaceObject, selasyn, arg, completionHandler);
-//                    break;
-//                }
-//            } else if ([JavascriptInterfaceObject respondsToSelector:sel]) {
-//                id ret = [self run:JavascriptInterfaceObject sel:sel args:arg];
-//                [result setValue:@0 forKey:@"code"];
-//
-//                if (ret != nil) {
-//                    [result setValue:ret forKey:@"data"];
-//                }
-//
-//                break;
-//            }
-//
-//            NSString *js = [error stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-//
-//            if (isDebug) {
-//                js = [NSString stringWithFormat:@"window.alert(decodeURIComponent(\"%@\"));", js];
-//                [self evaluateJavaScript:js completionHandler:nil];
-//            }
-//
-//            NSLog(@"%@", error);
-//        }while (0);
-//    }
-//
-//    return [JSBUtil objToJsonString:result];
-//}
-//
-//- (id)run:(id)swiftObject
-//      sel:(SEL)sel
-//     args:(id)args
-//{
-//    if (![swiftObject respondsToSelector:sel]) {
-//        return nil;
-//    }
-//
-//    Method method1 = class_getInstanceMethod([swiftObject class], sel);
-//    char retType[10];
-//    method_getReturnType(method1, retType, 10);
-//
-//    if (strcmp("v", retType) == 0) {
-//        void (*action)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
-//        action(swiftObject, sel, args);
-//        return nil;
-//    } else {
-//        id (*action)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
-//        id ret = action(swiftObject, sel, args);
-//        return ret;
-//    }
-//}
-//
-//- (void)setJavascriptCloseWindowListener:(void (^)(void))callback
-//{
-//    javascriptCloseWindowListener = callback;
-//}
-//
-
-//
-
-//
-//- (void)addJavascriptObject:(id)object
-//                  namespace:(NSString *)namespace
-//{
-//    if (namespace == nil) {
-//        namespace = @"";
-//    }
-//
-//    if (object != NULL) {
-//        [javaScriptNamespaceInterfaces setObject:object forKey:namespace];
-//    }
-//}
-//
-//- (void)removeJavascriptObject:(NSString *)namespace {
-//    if (namespace == nil) {
-//        namespace = @"";
-//    }
-//
-//    [javaScriptNamespaceInterfaces removeObjectForKey:namespace];
-//}
-//
-//- (void)customJavascriptDialogLabelTitles:(NSDictionary *)dic {
-//    if (dic) {
-//        dialogTextDic = dic;
-//    }
-//}
-//
 
 #pragma mark: - callback
 - (DWKEventCallback)dwk_eventCallbackWithId:(id)dwk_cb

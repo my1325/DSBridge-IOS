@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		815612F12022E42D00C4F5CD /* JsEchoApi.m in Sources */ = {isa = PBXBuildFile; fileRef = 815612F02022E42D00C4F5CD /* JsEchoApi.m */; };
 		815FCC931E1CE48F0073CA79 /* DWKUtil.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0BBE1E18C59200679925 /* DWKUtil.h */; };
-		818F0B941E18C08100679925 /* dsbridge.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 818F0B911E18C08100679925 /* dsbridge.h */; };
 		818F0BA21E18C0AA00679925 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BA11E18C0AA00679925 /* main.m */; };
 		818F0BA51E18C0AA00679925 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BA41E18C0AA00679925 /* AppDelegate.m */; };
 		818F0BA81E18C0AA00679925 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 818F0BA71E18C0AA00679925 /* ViewController.m */; };
@@ -49,7 +48,6 @@
 			files = (
 				815FCC931E1CE48F0073CA79 /* DWKUtil.h in CopyFiles */,
 				818F0BC41E18D44A00679925 /* DWKWebView.h in CopyFiles */,
-				818F0B941E18C08100679925 /* dsbridge.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,7 +58,6 @@
 		815612EF2022E42D00C4F5CD /* JsEchoApi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JsEchoApi.h; sourceTree = "<group>"; };
 		815612F02022E42D00C4F5CD /* JsEchoApi.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JsEchoApi.m; sourceTree = "<group>"; };
 		818F0B8E1E18C08100679925 /* libdsbridge.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libdsbridge.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		818F0B911E18C08100679925 /* dsbridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dsbridge.h; sourceTree = "<group>"; };
 		818F0B9E1E18C0AA00679925 /* dsbridgedemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = dsbridgedemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		818F0BA11E18C0AA00679925 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		818F0BA31E18C0AA00679925 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -140,7 +137,6 @@
 				B7F28DE32E152DFD00F33B2E /* SelMapHandler */,
 				B7E708A92E13BEE500D8072D /* RunTimeHandler */,
 				B7E708A82E13BAA700D8072D /* Core */,
-				818F0B911E18C08100679925 /* dsbridge.h */,
 			);
 			path = DSBridge;
 			sourceTree = "<group>";
