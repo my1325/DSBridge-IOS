@@ -1,0 +1,52 @@
+{
+  "": {
+    "canUseApplePay:": "",
+    "preventRecord": "preventRecord:",
+    "crashcheck": "crashcheck:",
+    "mobileInfoAsyn:": "mobileInfoAsyn:handler:",
+    "logout": "logout:",
+    "getUuid": "getUuid:",
+    "payAsyn:": "payAsyn:handler:",
+    "openAsyn:": "openAsyn:handler:",
+    "callGet": "",
+    "callPost": "",
+    "getChannelId": "getChannelId:",
+    "getAfId": "getAfId:",
+    "rateUs": "rateUs:",
+    "track": "track:",
+    "openUrlAsyn:": "openUrlAsyn:handler:"
+  },
+  "system": {
+    "getLang": "getLang:",
+    "setLang": "setLang:",
+    "openAppSettings": "openAppSettings:",
+    "idleTimerDisabled": "idleTimerDisabled:",
+    "videoPlay": "videoPlay:",
+    "applyUpdate": "",
+    "link:": ""
+  },
+  "loginAsyn": {
+    "success:": "success:handler:",
+    "apple:": "apple:handler:"
+  },
+  "page": {
+    "slideBack": "slideBack:",
+    "backBtn": "backBtn:",
+    "fullscreen": "fullscreen:"
+  },
+  "payAsyn": {
+    "order:": "order:handler:",
+    "exist:": "exist:handler:",
+    "success:": "success:handler:",
+    "restore:": ""
+  },
+  "recharge": {
+    "success": "success:"
+  },
+  "storage": {
+    "set": "set:",
+    "get": "get:",
+    "delete": "delete:",
+    "clear": "clear:"
+  }
+}

@@ -190,7 +190,7 @@
 }
 
 - (void)dwk_removeJavascriptObject:(DWKNamespace)dwk_namespace {
-    if (!dwk_namespace || !dwk_namespaceMap[dwk_namespace]) {
+    if (!dwk_namespaceMap[dwk_namespace]) {
         NSLog(@"Warning: Namespace '%@' does not exist. Cannot remove.", dwk_namespace);
         return;
     }

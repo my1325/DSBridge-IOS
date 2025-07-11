@@ -15,11 +15,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface DWKSelMapHandler : NSObject<DWKWebViewHandler>
 
-@property (nonatomic, strong, readonly) NSDictionary *dwk_selMap;
+//@property (nonatomic, strong, readonly) NSDictionary *dwk_selMap;
+//
+//@property (nonatomic, strong, readonly) id dwk_target;
+//
+//+ (instancetype)dwk_handlerWithTarget:(id)dwk_target selMap:(NSDictionary *)dwk_selMap;
 
-@property (nonatomic, strong, readonly) id dwk_target;
+- (void)dwk_registerNamespace: (NSString * _Nonnull)dwk_namespace
+                   withTarget: (id _Nonnull)dwk_target
+                   withSelMap: (NSDictionary *)dwk_selMap;
 
-+ (instancetype)dwk_handlerWithTarget:(id)dwk_target selMap:(NSDictionary *)dwk_selMap;
+- (void)dwk_removeTargetForNamespace: (NSString * _Nonnull)dwk_namespace;
 
 - (id)dwk_webView:(DWKWebView *)webView handleEvent:(DWKWebViewEvent *)event;
 

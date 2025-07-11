@@ -114,7 +114,7 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
         if (dwk_data) {
             [dwk_cbResult setValue:dwk_data forKey:@"data"];
         }
-        dwk_result = DWK_JSONString(dwk_data);
+        dwk_result = DWK_JSONString(dwk_cbResult);
     } else {
         NSLog(@"Cannot handle event: %@", dwk_event);
         dwk_result = DWK_JSONString((@{ @"code": @-1, @"data": @"" }));
@@ -485,13 +485,13 @@ static NSString *const DWK_Event_Args_Callback = @"_dscbstub";
                        @"data": dwk_value ? : @""
                };
 
-               NSString *dwk_retValue = [DWK_JSONString(dwk_data) stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+               NSString *dwk_retValue = DWK_JSONString(dwk_data);
 
                if (dwk_complete) {
                    dwk_del = [@"delete window." stringByAppendingString:dwk_cb];
                }
 
-               NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent(\"%@\")).data);%@; } catch(e){};", dwk_cb, (dwk_retValue == nil) ? @"" : dwk_retValue, dwk_del];
+               NSString *js = [NSString stringWithFormat:@"try {%@(JSON.parse(decodeURIComponent('%@')).data);%@; } catch(e){};", dwk_cb, (dwk_retValue == nil) ? @"" : dwk_retValue, dwk_del];
                __strong typeof(self) strongSelf = weakSelf;
                @synchronized(self)
                {
