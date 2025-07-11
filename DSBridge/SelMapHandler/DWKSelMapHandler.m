@@ -7,10 +7,9 @@
 //
 
 #import "DWKObjects.h"
-#import <objc/message.h>
-#import <objc/runtime.h>
 #import "DWKSelMapHandler.h"
 #import "DWKWebView.h"
+#import "DWKUtil.h"
 
 @interface DWKNamespaceSelMapObject : NSObject
 
@@ -54,7 +53,7 @@
     dwk_selMap = [@{} mutableCopy];
 
     if (!_dwk_object) {
-        NSLog(@"Warning: Attempted to set a nil object for namespace '%@'.", self.dwk_namespace);
+        DWKLog(@"Warning: Attempted to set a nil object for namespace '%@'.", self.dwk_namespace);
         return;
     }
 
@@ -65,37 +64,14 @@
         return;
     }
     
-    NSMutableSet *dwk_methodSet = [NSMutableSet set];
     NSSet *dwk_targetMethodSet = [NSSet setWithArray:dwk_targetMethodList];
-    
-    Class dwk_cls = [_dwk_object class];
 
-    while (dwk_cls && dwk_cls != [NSObject class]) {
-        unsigned int methodCount = 0;
-        Method *methods = class_copyMethodList([self.dwk_object class], &methodCount);
-
-        for (unsigned int i = 0; i < methodCount; i++) {
-            SEL selector = method_getName(methods[i]);
-            NSString *methodName = NSStringFromSelector(selector);
-
-            if (!methodName.length || ![dwk_targetMethodSet containsObject:methodName]) {
-                continue;
-            }
-
-            // Add the method name to the set
-            [dwk_methodSet addObject:methodName];
-        }
-
-        free(methods);
-
-        // Move to the superclass
-        dwk_cls = class_getSuperclass(dwk_cls);
-    }
+    NSSet *dwk_methodSet = dwk_method_list_for_class([_dwk_object class]);
     
     for (NSString *dwk_key in _dwk_originSelMap) {
         NSString *dwk_methodName = [_dwk_originSelMap valueForKey:dwk_key];
         if (!dwk_methodName.length || ![dwk_methodSet containsObject:dwk_methodName]) {
-            NSLog(@"Warning: Method '%@' not found in the target object for namespace '%@'.", dwk_methodName, self.dwk_namespace);
+            DWKLog(@"Warning: Method '%@' not found in the target object for namespace '%@'.", dwk_methodName, self.dwk_namespace);
             continue;
         }
         dwk_selMap[dwk_key] = [dwk_methodName copy];
@@ -116,7 +92,7 @@
     NSString *dwk_targetMethod = [dwk_selMap valueForKey:dwk_keyName];
     SEL dwk_resultSelector = NSSelectorFromString(dwk_targetMethod);
     if (!dwk_targetMethod.length || ![_dwk_object respondsToSelector:dwk_resultSelector]) {
-        NSLog(@"Warning: Method '%@' not found in the target object for namespace '%@'.", dwk_targetMethod, self.dwk_namespace);
+        DWKLog(@"Warning: Method '%@' not found in the target object for namespace '%@'.", dwk_targetMethod, self.dwk_namespace);
         return nil;
     }
     
@@ -126,6 +102,7 @@
 - (id)dwk_invokeWithSelector:(NSString *)dwk_selectorName
                    arguments:(NSArray *)arguments
            completionHandler:(void (^)(id, BOOL))completionHandler {
+    
     SEL dwk_selector = [self dwk_selectorForMethod:dwk_selectorName hasCompletion:completionHandler != nil];
 
     if (!dwk_selector) {
@@ -139,27 +116,14 @@
     if (dwk_colonCount >= 2) {
         id dwk_callback = completionHandler ?: ^(id result, BOOL success) {
             // Default completion handler if none provided
-            NSLog(@"Default completion handler called with result: %@, success: %d", result, success);
+            DWKLog(@"Default completion handler called with result: %@, success: %d", result, success);
         };
         
-        void (*dwk_action)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
-        dwk_action(_dwk_object, dwk_selector, args, dwk_callback);
+        dwk_invoke_method_with_callback(_dwk_object, dwk_selector, args, dwk_callback);
         return nil;
     }
-
-    Method method1 = class_getInstanceMethod([_dwk_object class], dwk_selector);
-    char retType[10];
-    method_getReturnType(method1, retType, 10);
-
-    if (strcmp("v", retType) == 0) {
-        void (*dwk_action)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
-        dwk_action(_dwk_object, dwk_selector, arguments);
-        return nil;
-    } else {
-        id (*dwk_action)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
-        id dwk_ret = dwk_action(_dwk_object, dwk_selector, arguments);
-        return dwk_ret;
-    }
+    
+    return dwk_invoke_method(_dwk_object, dwk_selector, arguments);
 }
 
 @end
@@ -178,7 +142,7 @@
 
 - (void)dwk_registerNamespace:(NSString *)dwk_namespace withTarget:(id)dwk_target withSelMap:(NSDictionary *)dwk_selMap {
     if (!dwk_target || !dwk_selMap.count) {
-        NSLog(@"Warning: Invalid parameters for registering namespace '%@'.", dwk_namespace);
+        DWKLog(@"Warning: Invalid parameters for registering namespace '%@'.", dwk_namespace);
         return;
     }
     
@@ -187,12 +151,12 @@
                                                                                                     withSelMap:dwk_selMap];
     
     if (!dwk_namespaceObject) {
-        NSLog(@"Warning: Failed to create namespace object for '%@'.", dwk_namespace);
+        DWKLog(@"Warning: Failed to create namespace object for '%@'.", dwk_namespace);
         return;
     }
     
     if (dwk_namespaceMap[dwk_namespace]) {
-        NSLog(@"Warning: Namespace '%@' already registered, overwriting.", dwk_namespace);
+        DWKLog(@"Warning: Namespace '%@' already registered, overwriting.", dwk_namespace);
     }
     
     dwk_namespaceMap[dwk_namespace] = dwk_namespaceObject;
@@ -200,7 +164,7 @@
 
 - (void)dwk_removeTargetForNamespace:(NSString *)dwk_namespace {
     if (!dwk_namespaceMap[dwk_namespace]) {
-        NSLog(@"Warning: Namespace '%@' does not exist. Cannot remove.", dwk_namespace);
+        DWKLog(@"Warning: Namespace '%@' does not exist. Cannot remove.", dwk_namespace);
         return;
     }
     
@@ -211,12 +175,12 @@
 - (BOOL)dwk_webView:(DWKWebView *)webView canHandleEvent:(DWKWebViewEvent *)eventName {
     DWKNamespaceSelMapObject *namespaceObject = dwk_namespaceMap[eventName.dwk_namespace];
     if (!namespaceObject) {
-        NSLog(@"Warning: Namespace '%@' does not exist.", eventName.dwk_namespace);
+        DWKLog(@"Warning: Namespace '%@' does not exist.", eventName.dwk_namespace);
         return NO;
     }
     SEL dwk_selector = [namespaceObject dwk_selectorForMethod:eventName.dwk_method hasCompletion:eventName.dwk_callback != nil];
     if (!dwk_selector) {
-        NSLog(@"Warning: Method '%@' in namespace '%@' does not exist.", eventName.dwk_method, eventName.dwk_namespace);
+        DWKLog(@"Warning: Method '%@' in namespace '%@' does not exist.", eventName.dwk_method, eventName.dwk_namespace);
         return NO;
     }
     return YES;
@@ -225,7 +189,7 @@
 - (id)dwk_webView:(DWKWebView *)webView handleEvent:(DWKWebViewEvent *)eventName {
     DWKNamespaceSelMapObject *namespaceObject = dwk_namespaceMap[eventName.dwk_namespace];
     if (!namespaceObject) {
-        NSLog(@"Warning: Namespace '%@' does not exist.", eventName.dwk_namespace);
+        DWKLog(@"Warning: Namespace '%@' does not exist.", eventName.dwk_namespace);
         return nil;
     }
 

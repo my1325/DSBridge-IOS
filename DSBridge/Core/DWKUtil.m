@@ -5,132 +5,10 @@
 //
 
 #import <objc/runtime.h>
-//#import "DWKWebView.h"
 #import "DWKUtil.h"
-
-
-//@implementation JSBUtil
-//+ (NSString *)objToJsonString:(id)dict
-//{
-//    NSString *jsonString = nil;
-//    NSError *error;
-//
-//    if (![NSJSONSerialization isValidJSONObject:dict]) {
-//        return @"{}";
-//    }
-//
-//    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&error];
-//
-//    if (!jsonData) {
-//        return @"{}";
-//    } else {
-//        jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-//    }
-//
-//    return jsonString;
-//}
-//
-////get this class all method
-// + (NSArray *)allMethodFromClass:(Class)class {
-//    NSMutableArray *methods = [NSMutableArray array];
-
-//    while (class) {
-//        unsigned int count = 0;
-//        Method *method = class_copyMethodList(class, &count);
-
-//        for (unsigned int i = 0; i < count; i++) {
-//            SEL name1 = method_getName(method[i]);
-//            const char *selName = sel_getName(name1);
-//            NSString *strName = [NSString stringWithCString:selName encoding:NSUTF8StringEncoding];
-//            [methods addObject:strName];
-//        }
-
-//        free(method);
-
-//        Class cls = class_getSuperclass(class);
-//        class = [NSStringFromClass(cls) isEqualToString:NSStringFromClass([NSObject class])] ? nil : cls;
-//    }
-
-//    return [NSArray arrayWithArray:methods];
-// }
-
-// //return method name for xxx: or xxx:handle:
-// + (NSString *)methodByNameArg:(NSInteger)argNum selName:(NSString *)selName class:(Class)class
-// {
-//     if (!class || !selName) {
-//         return nil;
-//     }
-
-//     NSArray *methods = [JSBUtil allMethodFromClass:class];
-//     NSInteger expectedColonCount = argNum;
-
-//     for (NSString *method in methods) {
-//         // 快速检查：如果方法名不是以selName开头，直接跳过
-//         if (![method hasPrefix:selName]) {
-//             continue;
-//         }
-
-//         // 计算冒号个数来判断参数个数
-//         NSInteger colonCount = [method componentsSeparatedByString:@":"].count - 1;
-
-//         if (colonCount == expectedColonCount) {
-//             // 进一步验证方法名前缀是否完全匹配
-//             if (colonCount == 0) {
-//                 // 无参数方法，直接比较整个方法名
-//                 if ([method isEqualToString:selName]) {
-//                     return method;
-//                 }
-//             } else {
-//                 // 有参数方法，提取方法名前缀比较
-//                 NSRange firstColonRange = [method rangeOfString:@":"];
-//                 if (firstColonRange.location != NSNotFound) {
-//                     NSString *methodPrefix = [method substringToIndex:firstColonRange.location];
-//                     if ([methodPrefix isEqualToString:selName]) {
-//                         return method;
-//                     }
-//                 }
-//             }
-//         }
-//     }
-
-//     return nil;
-// }
-//
-//+ (NSArray *)parseNamespace:(NSString *)method {
-//    NSRange range = [method rangeOfString:@"." options:NSBackwardsSearch];
-//    NSString *namespace = @"";
-//
-//    if (range.location != NSNotFound) {
-//        namespace = [method substringToIndex:range.location];
-//        method = [method substringFromIndex:range.location + 1];
-//    }
-//
-//    return @[namespace, method];
-//}
-//
-//+ (id)jsonStringToObject:(NSString *)jsonString
-//{
-//    if (jsonString == nil) {
-//        return nil;
-//    }
-//
-//    NSData *jsonData = [jsonString dataUsingEncoding:NSUTF8StringEncoding];
-//    NSError *err;
-//    NSDictionary *dic = [NSJSONSerialization JSONObjectWithData:jsonData
-//                                                        options:NSJSONReadingMutableContainers
-//                                                          error:&err];
-//
-//    if (err) {
-//        NSLog(@"json解析失败：%@", err);
-//        return nil;
-//    }
-//
-//    return dic;
-//}
-//
-//@end
-
 #import "DWKObjects.h"
+#import <objc/message.h>
+#import <objc/runtime.h>
 
 inline DWKWebViewEvent * dwk_event_with_origin(NSString *dwk_originString, id dwk_args) {
     return dwk_event_with_origin_handler(dwk_originString, dwk_args, nil);
@@ -209,4 +87,48 @@ inline NSDictionary * dwk_to_json_object(NSString *dwk_json_string) {
 #endif
 
     return @{};
+}
+
+
+NSSet<NSString *> * _Nonnull dwk_method_list_for_class(Class _Nonnull dwk_class) {
+    NSMutableSet *dwk_methodSet = [NSMutableSet set];
+    Class dwk_cls = dwk_class;
+    while (dwk_cls && dwk_cls != [NSObject class]) {
+        unsigned int methodCount = 0;
+        Method *methods = class_copyMethodList(dwk_cls, &methodCount);
+
+        for (unsigned int i = 0; i < methodCount; i++) {
+            SEL selector = method_getName(methods[i]);
+            NSString *methodName = NSStringFromSelector(selector);
+            // Add the method name to the set
+            [dwk_methodSet addObject:methodName];
+        }
+
+        free(methods);
+        // Move to the superclass
+        dwk_cls = class_getSuperclass(dwk_cls);
+    }
+    
+    return [dwk_methodSet copy];
+}
+
+id _Nullable dwk_invoke_method(id _Nonnull dwk_target, SEL _Nonnull dwk_selector, NSArray *_Nullable dwk_args) {
+    Method method1 = class_getInstanceMethod([dwk_target class], dwk_selector);
+    char retType[10];
+    method_getReturnType(method1, retType, 10);
+
+    if (strcmp("v", retType) == 0) {
+        void (*dwk_action)(id, SEL, id) = (void (*)(id, SEL, id))objc_msgSend;
+        dwk_action(dwk_target, dwk_selector, dwk_args);
+        return nil;
+    } else {
+        id (*dwk_action)(id, SEL, id) = (id (*)(id, SEL, id))objc_msgSend;
+        id dwk_ret = dwk_action(dwk_target, dwk_selector, dwk_args);
+        return dwk_ret;
+    }
+}
+
+extern void dwk_invoke_method_with_callback(id _Nonnull dwk_target, SEL _Nonnull dwk_selector, NSArray *_Nullable dwk_args, void (^_Nullable dwk_callback)(id _Nullable, BOOL)) {
+    void (*dwk_action)(id, SEL, id, id) = (void (*)(id, SEL, id, id))objc_msgSend;
+    dwk_action(dwk_target, dwk_selector, dwk_args, dwk_callback);
 }

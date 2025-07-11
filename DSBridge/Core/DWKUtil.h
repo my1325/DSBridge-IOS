@@ -47,6 +47,12 @@
     dwk_to_json_object(dwk_json_string)
 #endif
 
+#if DEBUG
+#define DWKLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__)
+#else
+#define DWKLog(fmt, ...) do { } while (0)
+#endif
+
 extern inline DWKWebViewEvent * _Nonnull dwk_event_with_origin(NSString *_Nonnull dwk_originString, id _Nonnull dwk_args);
 
 extern inline DWKWebViewEvent * _Nonnull dwk_event_with_origin_handler(NSString *_Nonnull dwk_originString, id _Nonnull dwk_args, void (^_Nullable dwk_callback)(id _Nullable result, BOOL complete));
@@ -54,3 +60,9 @@ extern inline DWKWebViewEvent * _Nonnull dwk_event_with_origin_handler(NSString 
 extern inline NSString * _Nonnull dwk_to_json_string(id _Nonnull dict);
 
 extern inline NSDictionary * _Nonnull dwk_to_json_object(NSString *_Nonnull dwk_json_string);
+
+extern NSSet<NSString *> * _Nonnull dwk_method_list_for_class(Class _Nonnull dwk_class);
+
+extern id _Nullable dwk_invoke_method(id _Nonnull dwk_target, SEL _Nonnull dwk_selector, NSArray *_Nullable dwk_args);
+
+extern void dwk_invoke_method_with_callback(id _Nonnull dwk_target, SEL _Nonnull dwk_selector, NSArray *_Nullable dwk_args, void (^_Nullable dwk_callback)(id _Nullable, BOOL));
